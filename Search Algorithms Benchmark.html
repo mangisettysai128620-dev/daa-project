@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Search Algorithms Benchmark | DAA Lab</title>
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--text:#1f2933;--muted:#667085;--line:#e1e5ea;--accent:#2563eb;--accent-t:#fff;--c1:#2563eb;--c2:#16a34a;--c3:#d97706;--c4:#dc2626;--bar:#cbd5e1;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#111418;--card:#1a1f26;--text:#e6e9ee;--muted:#98a2b3;--line:#2b323b;--accent:#4f8bff;--accent-t:#0b1220;--c1:#5b9bff;--c2:#34d17b;--c3:#f0b04a;--c4:#f26b6b;--bar:#3a4350}}
+:root[data-theme="dark"]{--bg:#111418;--card:#1a1f26;--text:#e6e9ee;--muted:#98a2b3;--line:#2b323b;--accent:#4f8bff;--accent-t:#0b1220;--c1:#5b9bff;--c2:#34d17b;--c3:#f0b04a;--c4:#f26b6b;--bar:#3a4350}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:"iQOO Sans","vivo Sans","iQOO Sans VF",-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;line-height:1.5;font-size:15px}
+.wrap{max-width:960px;margin:0 auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:6px 0 14px;border-bottom:1px solid var(--line);margin-bottom:18px}
+header small{color:var(--muted)}
+h1{font-size:26px;margin:0 0 4px}
+h2{font-size:18px;margin:0 0 4px}
+p.sub{margin:0 0 14px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px}
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+select,button{font:inherit;color:var(--text);background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 10px;width:100%}
+button{cursor:pointer;width:auto}
+button.primary{background:var(--accent);color:var(--accent-t);border-color:var(--accent)}
+button:disabled{opacity:.55;cursor:default}
+.row{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.status{margin-top:12px;font-size:13px;color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:12px}
+.stat{border:1px solid var(--line);border-radius:8px;padding:10px}
+.stat span{display:block;font-size:12px;color:var(--muted)}
+.stat b{font-size:20px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;min-width:600px}
+th,td{text-align:left;padding:8px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{color:var(--muted);font-weight:600}
+canvas{width:100%;height:300px;display:block}
+.legend{display:flex;flex-wrap:wrap;gap:14px;margin:8px 0;font-size:13px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-1px}
+#bars{display:flex;align-items:flex-end;gap:3px;height:180px;margin:10px 0}
+#bars div{flex:1;background:var(--bar);border-radius:3px 3px 0 0;position:relative;transition:background .15s}
+#bars div em{position:absolute;bottom:100%;left:0;right:0;text-align:center;font-size:9px;font-style:normal;color:var(--muted)}
+.keys{display:flex;flex-wrap:wrap;gap:12px;font-size:13px;color:var(--muted)}
+.keys i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px}
+footer{text-align:center;color:var(--muted);font-size:13px;padding:10px 0 24px}
+.ok{color:var(--c2)}.bad{color:var(--c4)}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div><strong>DAA Lab</strong><br><small>Algorithm analysis, JavaScript timer</small></div>
+  <button id="theme" type="button">Dark / Light</button>
+</header>
+
+<h1>Search Algorithms Benchmark</h1>
+<p class="sub">Measure and compare linear, binary, jump and interpolation search on sorted arrays of different sizes.</p>
+
+<section class="card">
+  <h2>1. Benchmark settings</h2>
+  <p class="sub">Choose the algorithm, array size, where the target sits and how many runs to take the median of.</p>
+  <div class="grid">
+    <div><label for="algo">Algorithm</label>
+      <select id="algo"><option>Linear Search</option><option selected>Binary Search</option><option>Jump Search</option><option>Interpolation Search</option></select></div>
+    <div><label for="size">Array size (N)</label>
+      <select id="size"><option value="1000">1,000</option><option value="10000" selected>10,000</option><option value="100000">100,000</option><option value="1000000">1,000,000</option></select></div>
+    <div><label for="mode">Target position</label>
+      <select id="mode"><option value="random" selected>Random element</option><option value="best">Best case (first)</option><option value="worst">Worst case (last)</option><option value="miss">Not in array</option></select></div>
+    <div><label for="runs">Runs (median)</label>
+      <select id="runs"><option>3</option><option selected>5</option><option>7</option></select></div>
+  </div>
+  <div class="row">
+    <button class="primary" id="run" type="button">Run benchmark</button>
+    <button id="all" type="button">Compare all</button>
+  </div>
+  <div class="status" id="status">Ready. Pick settings and press Run benchmark.</div>
+</section>
+
+<section class="card">
+  <h2>2. Result</h2>
+  <div class="stats">
+    <div class="stat"><span>Algorithm</span><b id="rAlgo">Binary Search</b></div>
+    <div class="stat"><span>Time per search (median)</span><b id="rTime">0.000 µs</b></div>
+    <div class="stat"><span>Theoretical</span><b id="rBig">O(log N)</b></div>
+    <div class="stat"><span>Correctness check</span><b id="rOk">Not run</b></div>
+  </div>
+  <div class="status" id="runs-list">Individual runs: none yet</div>
+</section>
+
+<section class="card">
+  <h2>3. Scaling graph</h2>
+  <p class="sub">Time per search against N, drawn on log scales. Press Compare all to fill it.</p>
+  <div class="legend" id="legend"></div>
+  <canvas id="chart"></canvas>
+  <h2 style="margin-top:18px">Comparison table</h2>
+  <p class="sub">Time per search in µs, using the target position selected above.</p>
+  <div class="scroll"><table id="tbl"></table></div>
+</section>
+
+<section class="card">
+  <h2>4. Step-by-step visualizer</h2>
+  <p class="sub">Watch the selected algorithm look for a target in a small sorted array.</p>
+  <div class="keys">
+    <span><i style="background:var(--bar)"></i>Out of range</span>
+    <span><i style="background:var(--c1)"></i>Search range</span>
+    <span><i style="background:var(--c3)"></i>Checking</span>
+    <span><i style="background:var(--c2)"></i>Found</span>
+  </div>
+  <div id="bars"></div>
+  <div class="status" id="vinfo">Target: none. Comparisons: 0</div>
+  <div class="row">
+    <button class="primary" id="vstart" type="button">Start</button>
+    <button id="vnew" type="button">New array</button>
+    <select id="vspeed" style="width:auto"><option value="900">Slow</option><option value="450" selected>Normal</option><option value="150">Fast</option></select>
+  </div>
+</section>
+
+<footer>DAA mini project, vanilla JavaScript, HTML canvas and CSS grid.</footer>
+</div>
+
+<script>
+var ALGOS = ["Linear Search","Binary Search","Jump Search","Interpolation Search"];
+var BIG = {"Linear Search":"O(N)","Binary Search":"O(log N)","Jump Search":"O(√N)","Interpolation Search":"O(log log N) avg"};
+var COLORS = ["--c4","--c1","--c3","--c2"];
+var SIZES = [1000,10000,100000,1000000];
+var $ = function(id){return document.getElementById(id)};
+var sink = 0, results = {}, busy = false;
+ALGOS.forEach(function(a){results[a]={}});
+
+function linear(a,t){for(var i=0;i<a.length;i++){if(a[i]===t)return i}return -1}
+function binary(a,t){var lo=0,hi=a.length-1;while(lo<=hi){var m=(lo+hi)>>1;if(a[m]===t)return m;if(a[m]<t)lo=m+1;else hi=m-1}return -1}
+function jump(a,t){var n=a.length,s=Math.floor(Math.sqrt(n)),prev=0,step=s;
+  while(prev<n&&a[Math.min(step,n)-1]<t){prev=step;step+=s}
+  for(var i=prev;i<Math.min(step,n);i++){if(a[i]===t)return i}return -1}
+function interp(a,t){var lo=0,hi=a.length-1;
+  while(lo<=hi&&t>=a[lo]&&t<=a[hi]){
+    if(a[hi]===a[lo])return a[lo]===t?lo:-1;
+    var p=lo+Math.floor((t-a[lo])*(hi-lo)/(a[hi]-a[lo]));
+    if(a[p]===t)return p;if(a[p]<t)lo=p+1;else hi=p-1}
+  return -1}
+var FN = {"Linear Search":linear,"Binary Search":binary,"Jump Search":jump,"Interpolation Search":interp};
+
+function makeArray(n){var a=new Int32Array(n);for(var i=0;i<n;i++)a[i]=i*2;return a}
+function makeTargets(a,mode,reps){
+  var n=a.length,t=new Int32Array(reps);
+  for(var i=0;i<reps;i++){
+    if(mode==="best")t[i]=a[0];
+    else if(mode==="worst")t[i]=a[n-1];
+    else if(mode==="miss")t[i]=a[Math.floor(Math.random()*n)]+1;
+    else t[i]=a[Math.floor(Math.random()*n)];
+  }
+  return t;
+}
+function repsFor(name,n,mode){
+  if(name==="Linear Search"&&mode!=="best")return Math.max(5,Math.min(5000,Math.floor(4e6/n)));
+  return 20000;
+}
+function median(x){var s=x.slice().sort(function(a,b){return a-b});return s[Math.floor(s.length/2)]}
+function tick(){return new Promise(function(r){setTimeout(r,0)})}
+
+async function bench(name,n,mode,runs){
+  var a=makeArray(n),fn=FN[name],reps=repsFor(name,n,mode),times=[],ok=true;
+  var chk=makeTargets(a,mode,200);
+  for(var i=0;i<chk.length;i++){var idx=fn(a,chk[i]);if(mode==="miss"?idx!==-1:a[idx]!==chk[i])ok=false}
+  for(var r=0;r<runs;r++){
+    var t=makeTargets(a,mode,reps);
+    fn(a,t[0]);
+    var s=performance.now();
+    for(var i=0;i<reps;i++)sink+=fn(a,t[i]);
+    var e=performance.now();
+    times.push((e-s)*1000/reps);
+    await tick();
+  }
+  return {med:median(times),times:times,ok:ok};
+}
+function fmt(v){return v<10?v.toFixed(3):v<1000?v.toFixed(2):v.toFixed(0)}
+
+function setBusy(b){busy=b;$("run").disabled=b;$("all").disabled=b}
+
+$("run").onclick=async function(){
+  if(busy)return;setBusy(true);
+  var name=$("algo").value,n=+$("size").value,mode=$("mode").value,runs=+$("runs").value;
+  $("status").textContent="Running "+name+" on "+n.toLocaleString()+" elements...";
+  await tick();
+  var r=await bench(name,n,mode,runs);
+  results[name][n]=r.med;
+  $("rAlgo").textContent=name;$("rBig").textContent=BIG[name];
+  $("rTime").textContent=fmt(r.med)+" µs";
+  $("rOk").innerHTML=r.ok?'<span class="ok">Passed</span>':'<span class="bad">Failed</span>';
+  $("runs-list").textContent="Individual runs (µs): "+r.times.map(fmt).join(", ");
+  $("status").textContent="Done. Median of "+runs+" runs.";
+  render();setBusy(false);
+};
+
+$("all").onclick=async function(){
+  if(busy)return;setBusy(true);
+  var mode=$("mode").value,runs=+$("runs").value;
+  for(var i=0;i<ALGOS.length;i++){
+    for(var j=0;j<SIZES.length;j++){
+      $("status").textContent="Comparing: "+ALGOS[i]+", N = "+SIZES[j].toLocaleString()+" ("+(i*SIZES.length+j+1)+" of "+ALGOS.length*SIZES.length+")";
+      await tick();
+      var r=await bench(ALGOS[i],SIZES[j],mode,runs);
+      results[ALGOS[i]][SIZES[j]]=r.med;
+    }
+    render();
+  }
+  $("status").textContent="Comparison finished.";setBusy(false);
+};
+
+function css(v){return getComputedStyle(document.documentElement).getPropertyValue(v).trim()}
+function render(){
+  var h="<tr><th>Algorithm</th><th>Complexity</th>"+SIZES.map(function(s){return"<th>N = "+s.toLocaleString()+"</th>"}).join("")+"</tr>";
+  ALGOS.forEach(function(a){
+    h+="<tr><td>"+a+"</td><td>"+BIG[a]+"</td>"+SIZES.map(function(s){var v=results[a][s];return"<td>"+(v==null?"–":fmt(v))+"</td>"}).join("")+"</tr>";
+  });
+  $("tbl").innerHTML=h;
+  $("legend").innerHTML=ALGOS.map(function(a,i){return'<span><i style="background:var('+COLORS[i]+')"></i>'+a+"</span>"}).join("");
+  drawChart();
+}
+function drawChart(){
+  var c=$("chart"),dpr=window.devicePixelRatio||1,W=c.clientWidth,H=c.clientHeight;
+  c.width=W*dpr;c.height=H*dpr;var g=c.getContext("2d");g.scale(dpr,dpr);g.clearRect(0,0,W,H);
+  var L=52,R=14,T=12,B=30,vals=[];
+  ALGOS.forEach(function(a){SIZES.forEach(function(s){if(results[a][s]>0)vals.push(results[a][s])})});
+  var line=css("--line"),mut=css("--muted");
+  g.font="11px sans-serif";g.textBaseline="middle";
+  if(!vals.length){g.fillStyle=mut;g.textAlign="center";g.fillText("No data yet. Run a benchmark.",W/2,H/2);return}
+  var lo=Math.floor(Math.log10(Math.min.apply(null,vals))),hi=Math.ceil(Math.log10(Math.max.apply(null,vals)));
+  if(hi<=lo)hi=lo+1;
+  var x0=Math.log10(SIZES[0]),x1=Math.log10(SIZES[SIZES.length-1]);
+  function X(n){return L+(Math.log10(n)-x0)/(x1-x0)*(W-L-R)}
+  function Y(v){return T+(hi-Math.log10(v))/(hi-lo)*(H-T-B)}
+  g.strokeStyle=line;g.fillStyle=mut;g.textAlign="right";
+  for(var e=lo;e<=hi;e++){var y=T+(hi-e)/(hi-lo)*(H-T-B);g.beginPath();g.moveTo(L,y);g.lineTo(W-R,y);g.stroke();g.fillText("1e"+e,L-6,y)}
+  g.textAlign="center";
+  SIZES.forEach(function(s){g.fillText(s>=1000000?"1M":s/1000+"K",X(s),H-B+14)});
+  g.save();g.translate(12,(H-B)/2);g.rotate(-Math.PI/2);g.fillText("µs per search",0,0);g.restore();
+  ALGOS.forEach(function(a,i){
+    var col=css(COLORS[i]),pts=SIZES.filter(function(s){return results[a][s]>0});
+    g.strokeStyle=col;g.fillStyle=col;g.lineWidth=2;g.beginPath();
+    pts.forEach(function(s,k){var x=X(s),y=Y(results[a][s]);k?g.lineTo(x,y):g.moveTo(x,y)});g.stroke();
+    pts.forEach(function(s){g.beginPath();g.arc(X(s),Y(results[a][s]),3.5,0,7);g.fill()});
+  });
+}
+window.addEventListener("resize",drawChart);
+$("algo").onchange=function(){$("rAlgo").textContent=this.value;$("rBig").textContent=BIG[this.value]};
+$("theme").onclick=function(){
+  var d=document.documentElement,dark=d.getAttribute("data-theme")==="dark"||(d.getAttribute("data-theme")!=="light"&&matchMedia("(prefers-color-scheme: dark)").matches);
+  d.setAttribute("data-theme",dark?"light":"dark");drawChart();
+};
+
+/* ---------- visualizer ---------- */
+var VN=20,varr=[],vsteps=[],vtimer=null,vtarget=0;
+function newArr(){
+  stopV();var v=0;varr=[];
+  for(var i=0;i<VN;i++){v+=1+Math.floor(Math.random()*9);varr.push(v)}
+  vtarget=Math.random()<0.2?varr[Math.floor(Math.random()*VN)]+1:varr[Math.floor(Math.random()*VN)];
+  vsteps=[];drawBars(null);$("vinfo").textContent="Target: "+vtarget+". Comparisons: 0";
+}
+function stepsFor(name,a,t){
+  var s=[],n=a.length,all=[0,n-1];
+  if(name==="Linear Search"){
+    for(var i=0;i<n;i++){s.push({r:all,c:i,f:a[i]===t});if(a[i]===t)return s}
+  }else if(name==="Binary Search"){
+    var lo=0,hi=n-1;
+    while(lo<=hi){var m=(lo+hi)>>1;s.push({r:[lo,hi],c:m,f:a[m]===t});if(a[m]===t)return s;if(a[m]<t)lo=m+1;else hi=m-1}
+  }else if(name==="Jump Search"){
+    var st=Math.floor(Math.sqrt(n)),prev=0,step=st;
+    while(prev<n&&a[Math.min(step,n)-1]<t){s.push({r:[prev,Math.min(step,n)-1],c:Math.min(step,n)-1,f:false});prev=step;step+=st}
+    if(prev<n){var end=Math.min(step,n)-1;s.push({r:[prev,end],c:end,f:a[end]===t});
+      for(var i=prev;i<=end;i++){s.push({r:[prev,end],c:i,f:a[i]===t});if(a[i]===t)return s}}
+  }else{
+    var lo=0,hi=n-1;
+    while(lo<=hi&&t>=a[lo]&&t<=a[hi]){
+      var p=a[hi]===a[lo]?lo:lo+Math.floor((t-a[lo])*(hi-lo)/(a[hi]-a[lo]));
+      s.push({r:[lo,hi],c:p,f:a[p]===t});if(a[p]===t)return s;if(a[p]<t)lo=p+1;else hi=p-1}
+  }
+  return s;
+}
+function drawBars(st){
+  var h="";
+  for(var i=0;i<VN;i++){
+    var col="var(--bar)";
+    if(st){
+      if(i>=st.r[0]&&i<=st.r[1])col="var(--c1)";
+      if(i===st.c)col=st.f?"var(--c2)":"var(--c3)";
+    }else col="var(--c1)";
+    h+='<div style="height:'+(varr[i]/varr[VN-1]*100)+'%;background:'+col+'"><em>'+varr[i]+"</em></div>";
+  }
+  $("bars").innerHTML=h;
+}
+function stopV(){if(vtimer){clearInterval(vtimer);vtimer=null}$("vstart").disabled=false}
+$("vstart").onclick=function(){
+  stopV();$("vstart").disabled=true;
+  vsteps=stepsFor($("algo").value,varr,vtarget);var k=0;
+  function go(){
+    if(k>=vsteps.length){stopV();$("vinfo").textContent="Target "+vtarget+" not found after "+vsteps.length+" comparisons.";drawBars({r:[0,-1],c:-1,f:false});return}
+    var st=vsteps[k++];drawBars(st);
+    $("vinfo").textContent="Target: "+vtarget+". Comparisons: "+k+(st.f?". Found at index "+st.c+".":"");
+    if(st.f)stopV();
+  }
+  go();if(vtimer===null&&k<vsteps.length&&!vsteps[k-1].f)vtimer=setInterval(go,+$("vspeed").value);
+};
+$("vnew").onclick=newArr;
+newArr();render();
+</script>
+</body>
+</html>
